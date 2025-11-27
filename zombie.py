@@ -138,10 +138,12 @@ class Zombie:
     def if_boy_nearby(self, distance):
         # 여기를 채우시오.
         if self.distance_less_than(common.boy.x, common.boy.y, self.x, self.y, distance):
-            return BehaviorTree.SUCCESS
+            if common.boy.ball_count <= self.ball_count:
+                return BehaviorTree.SUCCESS
+            else:
+                return BehaviorTree.FAIL
         else:
             return BehaviorTree.FAIL
-        pass
 
 
     def move_to_boy(self, r=0.5):
