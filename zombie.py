@@ -166,12 +166,20 @@ class Zombie:
         # 여기를 채우시오.
         self.state = 'Walk'
         self.move_little_to_far(common.boy.x, common.boy.y)
-        # 소년에 근접했으면 성공 리턴
         if not self.distance_less_than(common.boy.x, common.boy.y, self.x, self.y, r):
             return BehaviorTree.SUCCESS
         else:
             return BehaviorTree.RUNNING
-
+    def zombie_ball_more(self):
+        if self.ball_count >= common.boy.ball_count:
+            return BehaviorTree.SUCCESS
+        else:
+            return BehaviorTree.FAIL
+    def person_ball_more(self):
+        if self.ball_count < common.boy.ball_count:
+            return BehaviorTree.SUCCESS
+        else:
+            return BehaviorTree.FAIL
     def get_patrol_location(self):
         # 여기를 채우시오.
         self.tx, self.ty = self.patrol_locations[self.loc_no]
@@ -189,7 +197,8 @@ class Zombie:
 
         c1 = Condition('소년이 근처에 있는가', self.if_boy_nearby, 7)
         a4 = Action('소년 추적', self.move_to_boy)
-        chase_if_boy_nearby = Sequence('소년이 근처에 있으면 추적', c1, a4)
+        c2 = Condition('좀비의 공이 더 많은가', self.zombie_ball_more)
+        chase_if_boy_nearby = Sequence('소년이 근처에 있으면 추적', c1, c2, a4)
 
         chase_or_wander = Selector('소년이 가까이 있으면 추적 아니면 배회', chase_if_boy_nearby, wander)
 
@@ -199,9 +208,12 @@ class Zombie:
         root = patrol_or_chase = Selector('순찰 또는 추적', chase_if_boy_nearby, patrol)
 
         a6 = Action('소년으로부터 도망', self.run_from_boy)
-        run_if_boy_nearby = Sequence('소년이 근처에 있으면 도망', c1, a6)
+        c3 = Condition('사람의 공이 더 많은가', self.person_ball_more)
+        run_if_boy_nearby = Sequence('소년이 근처에 있으면 도망', c1, c3, a6)
 
-        chase_or_run = Selector('추적 또는 도망', chase_if_boy_nearby, run_if_boy_nearby)
+
+
+        chase_or_run = Selector('추적 또는 도망',  chase_if_boy_nearby,  run_if_boy_nearby)
 
         root = patrol_or_chase_or_run = Selector('순찰 또는 추적 또는 도망', chase_or_run, patrol)
 
